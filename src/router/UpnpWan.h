@@ -24,5 +24,5 @@ private:
         double rx = 0;
         double tx = 0;
     };
-    std::deque<Point> m_hist;   // 最近 2 秒的计数，按 1 秒窗口算平均速率
+    std::deque<Point> m_hist;   // 上一次与本次计数，按采样间隔算速率
 };

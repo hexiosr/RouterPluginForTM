@@ -7,6 +7,7 @@ struct DisplayConfig {
     int unitMode = 0;        // 0 = MB/s，1 = Mbps
     int decimals = 2;        // 0..2
     int widthReserve = 0;    // 0 = 自动（按当前值），1..4 = 固定整数位
+    int sampleMs = 1000;     // 采样间隔，200..5000 ms
 };
 
 class ConfigManager {

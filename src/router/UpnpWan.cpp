@@ -126,15 +126,10 @@ bool UpnpWan::Sample(double& upKBps, double& downKBps) {
 
     auto now = std::chrono::steady_clock::now();
     m_hist.push_back({ now, rx, tx });
-    while (m_hist.size() > 2 && std::chrono::duration<double>(now - m_hist.front().t).count() > 2.0)
-        m_hist.pop_front();
+    while (m_hist.size() > 2) m_hist.pop_front();
 
-    // 用至少 1 秒前的计数做基准：既比路由器 2 秒量化新，又不会因为瞬时突发乱跳
-    const Point* anchor = nullptr;
-    for (const auto& p : m_hist) {
-        double age = std::chrono::duration<double>(now - p.t).count();
-        if (age >= 0.9 && age <= 2.0) anchor = &p;
-    }
+    // 以上一次采样为基准：速率窗口等于采样间隔（默认 1 秒）
+    const Point* anchor = m_hist.size() >= 2 ? &m_hist.front() : nullptr;
     if (anchor) {
         double dt = std::chrono::duration<double>(now - anchor->t).count();
         double dRx = rx - anchor->rx;

@@ -309,8 +309,8 @@ void CRouterTotalSpeedPlugin::WanLoop() {
             m_state.store(2);
         }
 
-        // 固定 1 秒一个周期：显示值每秒只更新一次（请求耗时从周期里扣除）
-        int periodMs = wan.Ready() ? 1000 : 3000;
+        // 采样间隔可配置；请求耗时从周期里扣除，保证显示按设定节奏更新
+        int periodMs = wan.Ready() ? ConfigManager::Instance().Get().sampleMs : 3000;
         int elapsedMs = (int)std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - cycleStart).count();
         int waitMs = periodMs - elapsedMs;
