@@ -38,6 +38,10 @@ void ConfigManager::Load() {
     cfg.sampleMs = (int)GetPrivateProfileIntW(L"Display", L"SampleMs", 1000, file.c_str());
     if (cfg.sampleMs < 200 || cfg.sampleMs > 5000) cfg.sampleMs = 1000;
 
+    // 旧版本遗留的键：宽度预留（自绘时代）和显示今日流量开关
+    WritePrivateProfileStringW(L"Display", L"WidthReserve", nullptr, file.c_str());
+    WritePrivateProfileStringW(L"Display", L"ShowToday", nullptr, file.c_str());
+
     std::lock_guard<std::mutex> lock(m_mutex);
     m_cfg = cfg;
 }

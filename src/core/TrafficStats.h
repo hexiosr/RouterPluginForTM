@@ -1,4 +1,4 @@
-// TrafficStats.h - 今日流量累计（基于 WAN 计数器增量，账本独立于显示配置）
+// TrafficStats.h - 今日流量累计（基于 WAN 计数器增量，账本存在主配置的 [Stats] 段）
 #pragma once
 #include "pch.h"
 

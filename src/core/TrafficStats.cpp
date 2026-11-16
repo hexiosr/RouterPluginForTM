@@ -7,8 +7,23 @@ namespace {
 constexpr unsigned long long kU32 = 4294967296ULL;
 
 std::wstring StatsFile(const std::wstring& dir) {
-    if (dir.empty()) return L"RouterTotalSpeedStats.ini";
-    return dir + L"\\RouterTotalSpeedStats.ini";
+    if (dir.empty()) return L"RouterTotalSpeed.ini";
+    return dir + L"\\RouterTotalSpeed.ini";
+}
+
+// 旧版本把 [Stats] 单独放在 RouterTotalSpeedStats.ini，合并进主配置后删掉旧文件
+void MigrateLegacy(const std::wstring& dir) {
+    if (dir.empty()) return;
+    std::wstring old = dir + L"\\RouterTotalSpeedStats.ini";
+    if (GetFileAttributesW(old.c_str()) == INVALID_FILE_ATTRIBUTES) return;
+    const wchar_t* keys[] = { L"Date", L"RxBytes", L"TxBytes", L"LastRx", L"LastTx" };
+    for (const wchar_t* key : keys) {
+        wchar_t buf[32] = {};
+        GetPrivateProfileStringW(L"Stats", key, L"", buf, 32, old.c_str());
+        if (buf[0] == L'\0') continue;
+        WritePrivateProfileStringW(L"Stats", key, buf, StatsFile(dir).c_str());
+    }
+    DeleteFileW(old.c_str());
 }
 
 std::wstring ReadValue(const wchar_t* key, const std::wstring& file) {
@@ -33,6 +48,7 @@ int TrafficStats::TodayDate(time_t now) {
 
 void TrafficStats::Init(const std::wstring& dir) {
     m_path = StatsFile(dir);
+    MigrateLegacy(dir);
     time_t now = time(nullptr);
     int today = TodayDate(now);
     if ((int)GetPrivateProfileIntW(L"Stats", L"Date", 0, m_path.c_str()) == today) {

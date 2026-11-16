@@ -30,7 +30,7 @@ TrafficMonitor 1.86 的任务栏多行排列是「相邻项一组」：想让两
 - 小数位：0 / 1 / 2 位，速率和流量共用
 - 采样间隔：200–5000 ms，默认 1000 ms
 
-设置保存在插件目录下 `RouterTotalSpeed.ini` 的 `[Display]` 段；今日流量累计保存在 `RouterTotalSpeedStats.ini` 的 `[Stats]` 段。
+设置和今日累计都在插件目录下的 `RouterTotalSpeed.ini`：`[Display]` 段是选项，`[Stats]` 段是今日累计和停机锚点。
 
 ## 显示含义
 
