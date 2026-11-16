@@ -296,6 +296,7 @@ void CRouterTotalSpeedPlugin::WanLoop() {
     int fails = 0;
 
     while (!m_stop.load()) {
+        auto cycleStart = std::chrono::steady_clock::now();
         double up = 0, down = 0;
         bool ok = wan.Sample(up, down);
         if (ok) {
@@ -308,7 +309,12 @@ void CRouterTotalSpeedPlugin::WanLoop() {
             m_state.store(2);
         }
 
-        int waitMs = wan.Ready() ? 500 : 3000;
+        // 固定 1 秒一个周期：显示值每秒只更新一次（请求耗时从周期里扣除）
+        int periodMs = wan.Ready() ? 1000 : 3000;
+        int elapsedMs = (int)std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now() - cycleStart).count();
+        int waitMs = periodMs - elapsedMs;
+        if (waitMs < 0) waitMs = 0;
         for (int t = 0; t < waitMs && !m_stop.load(); t += 100) Sleep(100);
     }
 }
