@@ -9,7 +9,6 @@ enum {
     IDC_CHECK_UNIT = 1001,
     IDC_COMBO_UNIT,
     IDC_COMBO_DECIMALS,
-    IDC_COMBO_WIDTH,
     IDC_EDIT_SAMPLE,
     IDC_BTN_OK,
     IDC_BTN_APPLY,
@@ -23,11 +22,9 @@ struct DlgState {
     HWND hCheckUnit = nullptr;
     HWND hComboUnit = nullptr;
     HWND hComboDecimals = nullptr;
-    HWND hComboWidth = nullptr;
     HWND hEditSample = nullptr;
     HWND hLblUnit = nullptr;
     HWND hLblDecimals = nullptr;
-    HWND hLblWidth = nullptr;
     HWND hLblSample = nullptr;
     HWND hLblMs = nullptr;
 };
@@ -101,19 +98,15 @@ void CreateControls(HWND hWnd, DlgState* st) {
         &st->hLblDecimals);
     add(L"COMBOBOX", L"", CBS_DROPDOWNLIST | WS_VSCROLL | WS_BORDER,
         146, 162, 120, 200, IDC_COMBO_DECIMALS, &st->hComboDecimals);
-    add(L"STATIC", L"宽度预留", SS_LEFT | SS_CENTERIMAGE, 48, 220, 86, 30, 0,
-        &st->hLblWidth);
-    add(L"COMBOBOX", L"", CBS_DROPDOWNLIST | WS_VSCROLL | WS_BORDER,
-        146, 220, 120, 200, IDC_COMBO_WIDTH, &st->hComboWidth);
-    add(L"STATIC", L"采样间隔", SS_LEFT | SS_CENTERIMAGE, 48, 278, 86, 30, 0,
+    add(L"STATIC", L"采样间隔", SS_LEFT | SS_CENTERIMAGE, 48, 220, 86, 30, 0,
         &st->hLblSample);
     add(L"EDIT", L"", WS_BORDER | ES_NUMBER,
-        146, 278, 120, 30, IDC_EDIT_SAMPLE, &st->hEditSample);
-    add(L"STATIC", L"ms", SS_CENTERIMAGE, 272, 278, 26, 30, 0, &st->hLblMs);
+        146, 220, 120, 30, IDC_EDIT_SAMPLE, &st->hEditSample);
+    add(L"STATIC", L"ms", SS_CENTERIMAGE, 272, 220, 26, 30, 0, &st->hLblMs);
 
-    add(L"BUTTON", L"确定", BS_OWNERDRAW, 28, 346, 92, 38, IDC_BTN_OK);
-    add(L"BUTTON", L"应用", BS_OWNERDRAW, 136, 346, 92, 38, IDC_BTN_APPLY);
-    add(L"BUTTON", L"取消", BS_OWNERDRAW, 244, 346, 92, 38, IDC_BTN_CANCEL);
+    add(L"BUTTON", L"确定", BS_OWNERDRAW, 28, 288, 92, 38, IDC_BTN_OK);
+    add(L"BUTTON", L"应用", BS_OWNERDRAW, 136, 288, 92, 38, IDC_BTN_APPLY);
+    add(L"BUTTON", L"取消", BS_OWNERDRAW, 244, 288, 92, 38, IDC_BTN_CANCEL);
     g_btnHover[0] = g_btnHover[1] = g_btnHover[2] = false;
     g_btnOldProc = nullptr;
     for (HWND h = GetWindow(hWnd, GW_CHILD); h; h = GetWindow(h, GW_HWNDNEXT)) {
@@ -132,12 +125,6 @@ void CreateControls(HWND hWnd, DlgState* st) {
     SendMessageW(st->hComboDecimals, CB_ADDSTRING, 0, (LPARAM)L"1 位小数");
     SendMessageW(st->hComboDecimals, CB_ADDSTRING, 0, (LPARAM)L"2 位小数");
     SendMessageW(st->hComboDecimals, CB_SETCURSEL, cfg.decimals, 0);
-    SendMessageW(st->hComboWidth, CB_ADDSTRING, 0, (LPARAM)L"自动");
-    SendMessageW(st->hComboWidth, CB_ADDSTRING, 0, (LPARAM)L"预留 1 位");
-    SendMessageW(st->hComboWidth, CB_ADDSTRING, 0, (LPARAM)L"预留 2 位");
-    SendMessageW(st->hComboWidth, CB_ADDSTRING, 0, (LPARAM)L"预留 3 位");
-    SendMessageW(st->hComboWidth, CB_ADDSTRING, 0, (LPARAM)L"预留 4 位");
-    SendMessageW(st->hComboWidth, CB_SETCURSEL, cfg.widthReserve, 0);
     SendMessageW(st->hEditSample, EM_SETLIMITTEXT, 4, 0);
     wchar_t msBuf[16] = {};
     swprintf_s(msBuf, L"%d", cfg.sampleMs);
@@ -146,7 +133,6 @@ void CreateControls(HWND hWnd, DlgState* st) {
     // 静态文字按控件实际闭合高度对齐，避免标签比框内文字高/低几像素
     AlignVertically(st->hLblDecimals, st->hComboDecimals);
     AlignVertically(st->hLblUnit, st->hComboUnit);
-    AlignVertically(st->hLblWidth, st->hComboWidth);
     AlignVertically(st->hLblSample, st->hEditSample);
     AlignVertically(st->hLblMs, st->hEditSample);
 
@@ -160,8 +146,6 @@ void SaveFromDialog(DlgState* st) {
     cfg.unitMode = (unitSel == 1) ? 1 : 0;
     LRESULT decSel = SendMessageW(st->hComboDecimals, CB_GETCURSEL, 0, 0);
     cfg.decimals = (decSel >= 0 && decSel <= 2) ? (int)decSel : 2;
-    LRESULT widthSel = SendMessageW(st->hComboWidth, CB_GETCURSEL, 0, 0);
-    cfg.widthReserve = (widthSel >= 0 && widthSel <= 4) ? (int)widthSel : 0;
     wchar_t msBuf[16] = {};
     GetWindowTextW(st->hEditSample, msBuf, 16);
     int ms = msBuf[0] ? (int)wcstol(msBuf, nullptr, 10) : 1000;
@@ -228,8 +212,8 @@ LRESULT CALLBACK DlgWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         // 按钮区上方一条发丝线，划分表单与操作区
         HPEN pen = CreatePen(PS_SOLID, 1, RGB(229, 229, 234));
         HPEN old = (HPEN)SelectObject(hdc, pen);
-        MoveToEx(hdc, 48, 330, nullptr);
-        LineTo(hdc, 298, 330);
+        MoveToEx(hdc, 48, 272, nullptr);
+        LineTo(hdc, 298, 272);
         SelectObject(hdc, old);
         DeleteObject(pen);
         EndPaint(hWnd, &ps);
@@ -306,8 +290,8 @@ bool COptionsDlg::Show(HWND hParent) {
 
     DlgState state;
 
-    // 客户区 346x408；按显示器工作区校正位置，避免弹到屏幕外
-    RECT rcWnd = { 0, 0, 346, 408 };
+    // 客户区 346x350；按显示器工作区校正位置，避免弹到屏幕外
+    RECT rcWnd = { 0, 0, 346, 350 };
     AdjustWindowRectEx(&rcWnd, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU, FALSE,
                        WS_EX_DLGMODALFRAME);
     int W = rcWnd.right - rcWnd.left;

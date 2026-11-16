@@ -9,6 +9,10 @@ public:
     void Reset();
     bool Ready() const { return !m_controlUrl.empty(); }
 
+    // 最近一次采样到的原始计数（供流量累计用；未采样时为 0）
+    double LastRx() const { return m_hist.empty() ? 0 : m_hist.back().rx; }
+    double LastTx() const { return m_hist.empty() ? 0 : m_hist.back().tx; }
+
 private:
     bool Discover();
     bool ResolveService(const std::string& location);

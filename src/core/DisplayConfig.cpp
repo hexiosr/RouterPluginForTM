@@ -35,8 +35,6 @@ void ConfigManager::Load() {
     if (cfg.unitMode != 1) cfg.unitMode = 0;
     cfg.decimals = (int)GetPrivateProfileIntW(L"Display", L"Decimals", 2, file.c_str());
     if (cfg.decimals < 0 || cfg.decimals > 2) cfg.decimals = 2;
-    cfg.widthReserve = (int)GetPrivateProfileIntW(L"Display", L"WidthReserve", 0, file.c_str());
-    if (cfg.widthReserve < 0 || cfg.widthReserve > 4) cfg.widthReserve = 0;
     cfg.sampleMs = (int)GetPrivateProfileIntW(L"Display", L"SampleMs", 1000, file.c_str());
     if (cfg.sampleMs < 200 || cfg.sampleMs > 5000) cfg.sampleMs = 1000;
 
@@ -49,7 +47,6 @@ void ConfigManager::Save(const DisplayConfig& cfg) {
     WritePrivateProfileStringW(L"Display", L"ShowUnit", cfg.showUnit ? L"1" : L"0", file.c_str());
     WritePrivateProfileStringW(L"Display", L"UnitMode", std::to_wstring(cfg.unitMode).c_str(), file.c_str());
     WritePrivateProfileStringW(L"Display", L"Decimals", std::to_wstring(cfg.decimals).c_str(), file.c_str());
-    WritePrivateProfileStringW(L"Display", L"WidthReserve", std::to_wstring(cfg.widthReserve).c_str(), file.c_str());
     WritePrivateProfileStringW(L"Display", L"SampleMs", std::to_wstring(cfg.sampleMs).c_str(), file.c_str());
 
     std::lock_guard<std::mutex> lock(m_mutex);

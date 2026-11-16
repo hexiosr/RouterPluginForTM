@@ -27,6 +27,7 @@ REM -Os + LTO + 段级裁剪：静态 libstdc++ 的体积优化（不改运行�
   -shared -static -static-libgcc -static-libstdc++ -s ^
   -I"%SRC%\core" -I"%SRC%\net" -I"%SRC%\router" -I"%SRC%\ui" -I"%SRC%\sdk" ^
   "%SRC%\core\RouterTotalSpeedPlugin.cpp" "%SRC%\core\DisplayConfig.cpp" ^
+  "%SRC%\core\TrafficStats.cpp" ^
   "%SRC%\core\PluginIcon.cpp" "%SRC%\core\pch.cpp" ^
   "%SRC%\net\Util.cpp" "%SRC%\net\Http.cpp" ^
   "%SRC%\router\UpnpWan.cpp" ^
